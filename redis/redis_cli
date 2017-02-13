@@ -1,0 +1,23 @@
+1 命令行
+redis-cli -h host -p port -n databasenum  incr a
+
+2从其他地方获取参数
+
+redis-cli set foo </etc/service
+
+echo "incr a" |redis-cli
+
+cat /temp/a.txt |redis-cli   文件中可以包含多个命令
+
+
+3 重复执行命令
+
+-r <count>  -i <delay>   
+-r执行次数 -i 间隔默认为0
+redis-cli -r 3 -i 2 incr a  执行3次 间隔 2秒
+count为 -1  无限次
+
+
+4 交互式模式
+help 获取命令帮助，可以使用tab补全
+

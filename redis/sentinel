@@ -1,0 +1,82 @@
+1 功能
+1)监控 监控 master和slave 是否正常
+2)通知 通过api通知管理员或其他用户redis实例出现某种问题
+3）故障转移   master出现故障后，会将某一个slave晋升为master 
+4）配置提供  故障转移后，master的地址
+
+2 配置
+1) 启动  sentinel 
+redis-sentinel /path/to/sentinel.conf 或者 redis-server /path/to/sentinel.conf --sentinel
+2)配置
+sentinel monitor mymaster 127.0.0.1 6379 2
+sentinel down-after-milliseconds mymaster 60000
+sentinel failover-timeout mymaster 180000
+sentinel parallel-syncs mymaster 1
+第一行配置
+sentinel monitor <master-group-name> <ip> <port> <quorum> 
+
+quorum 表示达成master不可用最少需要的sentinel同意
+处理故障转移之前需要从sentinels中选出一个learder处理故障转移，选举需要多数同意
+
+第二行到第四行配置
+sentinel <option_name> <master_name> <option_value>
+down-after-milliseconds 对于Ping请求没有回复和回复错误的时间范围，确认sentinel不可用。选项指定了 Sentinel 认为服务器已经断线所需的毫秒数（判定为主观下线SDOWN）
+parallel-syncs 选项指定了在执行故障转移时， 最多可以有多少个从服务器同时对新的主服务器进行同步， 这个数字越小， 完成故障转移所需的时间就越长，但越大就意味着越多的从服务器因为复制而不可用。可以通过将这个值设为 1 来保证每次只有一个从服务器处于不能处理命令请求的状态。
+
+3 主观下线和客观下线
+
+    1. 主观下线（Subjectively Down， 简称 SDOWN）指的是单个 Sentinel 实例对服务器做出的下线判断。
+    2. 客观下线（Objectively Down， 简称 ODOWN）指的是多个 Sentinel 实例在对同一个服务器做出 SDOWN 判断， 并且通过 SENTINEL is-master-down-by-addr 命令互相交流之后， 得出的服务器下线判断。
+
+客观下线条件只适用于主服务器： 对于任何其他类型的 Redis 实例， Sentinel 在将它们判断为下线前不需要进行协商， 所以从服务器或者其他 Sentinel 永远不会达到客观下线条件。
+只要一个 Sentinel 发现某个主服务器进入了客观下线状态， 这个 Sentinel 就可能会被其他 Sentinel 推选出， 并对失效的主服务器执行自动故障迁移操作。
+
+4 Sentinel API
+
+有两种方式可以与Sentinel进行通讯：指令、发布与订阅。
+
+    1)Sentinel命令
+
+       PING ：返回 PONG 。
+
+       SENTINEL masters ：列出所有被监视的主服务器，以及这些主服务器的当前状态；
+
+       SENTINEL slaves <master name> ：列出给定主服务器的所有从服务器，以及这些从服务器的当前状态；
+
+       SENTINEL get-master-addr-by-name <master name> ： 返回给定名字的主服务器的 IP 地址和端口号。 如果这个主服务器正在执行故障转移操作， 或者针对这个主服务器的故障转移操作已经完成， 那么这个                     命令返回新的主服务器的 IP 地址和端口号；
+
+       SENTINEL reset <pattern> ： 重置所有名字和给定模式 pattern 相匹配的主服务器。 pattern 参数是一个 Glob 风格的模式。 重置操作清楚主服务器目前的所有状态， 包括正在执行中的故障转移， 并移除目前已经发现和关联的， 主服务器的所有从服务器和 Sentinel ；
+
+       SENTINEL failover <master name> ： 当主服务器失效时， 在不询问其他 Sentinel 意见的情况下， 强制开始一次自动故障迁移。
+
+       SENTINEL ckquorum <master name> : 检查sentinel是否可以到故障转移所需的数量
+       SENTINEL flushconfig :强制所有sentinel将配置写入磁盘
+
+5 运行时重新配置选项
+ 1) SENTINEL MONITOR <name> <ip> <port> <quorum> : 添加新的master监控
+ 2) SENTINEL REMOVE <name>  : 移除监控
+ 3) SENTINEL SET <name> <option> <value> : 修改某个master的配置
+
+6 添加和移除sentinel
+  1) 添加 
+启动 sentinel  ，如果一次添加多个，一个一个的添加
+  2） 移除
+     关闭sentinel进程
+     执行 sentinel reset * 命令 对所有的sentinel
+     检查所有的sentinel的 sentinel列表
+
+7 自动发现机制
+每个sentinel以两秒的频率的向所有的master和slave的_sentinel_:hello频道发送  ip port runid 信息
+每个sentinel订阅所有的master和slave的_sentinel_:hello频道的信息
+hello message 包含master的当前配置
+在加入新的sentinel之前会检查ip port 和runid 如果有会吧老的删除，新的加入
+
+8 TITL模式
+
+所谓TITL模式即只收集数据，而不做fail-over
+进入TITL模式的原因可能是：
+1）sentinel的部分操作被阻塞（可能是系统负载导致）
+2）系统时钟异常
+进入条件，两次进入sentinelCheckTiltCondition时间差值<0或者>2s
+进入TITL模式的原因是为了避免错误的进行fail-over
+
