@@ -1,0 +1,7 @@
+# HyperLogLogs  用于唯一事物统计，统计唯一事物的数量
+
+操作
+pfadd key a  插入
+pfcount key  计数
+pfmerge destkey sourcekey [sourcekey,]  合并多个到一个
+
