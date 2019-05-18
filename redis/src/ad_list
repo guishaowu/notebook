@@ -1,0 +1,21 @@
+ad_list （双向链表， node包含两个指针，pre, next)
+
+支持方法
+listCreate 创建空链表
+listEmpty 清空链表元素，释放元素内存
+listRelease  释放链表（清空链表，释放链表内存）
+listAddNodeHead 头部添加元素 (创建节点，赋值，加入头部,修改长度）
+listAddNodeTail 尾部添加元素（创建节点，赋值，加入尾部,修改长度）
+listInsertNode 插入元素（创建节点，赋值，加入指定节点的前或者后，修改长度）
+listDelNode    删除元素（调整节点前后节点中前后指针的指向， 释放元素）
+listGetIterator  获取迭代器（传入迭代方向，从前往后或从后往前）
+listReleaseIterator 释放迭代器 
+listNext  返回链表下一个元素， 传入迭代器
+listDup   复制链表，创建一个迭代器，使用迭代器迭代复制链表元素，复制链表的操作函数
+listSearchKey  查找某个值所在的元素
+listIndex  返回索引所在的元素，索引为负，从尾部开始
+listRotate 将尾部元素移动到头部
+listJoin  将后面一个链表，加入到前面一个链表的尾部
+
+
+
