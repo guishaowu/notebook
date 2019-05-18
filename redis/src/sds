@@ -1,0 +1,39 @@
+# sds  字符串
+
+struct __attribute__ ((__packed__)) sdshdr8  取消结构体内字节对齐
+
+sdshdr 包含4个属性
+len 长度
+alloc 已分配空间
+flags 标识 实际类型，8位，16位，32位，64位
+buf[]  存储内容
+
+
+操作
+
+sdslen  返回字符串长度，根据类型使用对应的len属性
+sdsavail 返回字符串是否还有空间可以使用
+sdssetlen  设置长度
+sdsinclen  长度值增长 inc
+sdsalloc  已分配的空间
+sdssetalloc 设置alloc的值
+sdsReqType 根据需要的长度，返回对应的类型
+sdsnewlen  创建长度为initlen的sds,根据传入参数初始化
+sdsempty 创建长度为0的 sds
+sdsnew 根据传入的初始话参数，创建sds
+sdsdup 根据传入的sds  复制一个新的sds
+sdsfree 释放sds
+sdsupdatelen  更新sds的长度为实际长度
+sdsclear  清空sds 
+sdsMakeRoomFor 保证有足够空间，如果空间不足，分配新空间
+sdsRemoveFreeSpace 删除多余的空间
+sdsAllocSize  sds分配的所有空间包含属性占用的空间
+sdsAllocPtr  返回sds的指针，
+sdsIncrlen 增加字符串长度，较少空闲长度，设置字符串结束符号
+sdsgrowzero  增长字符串到指定长度，中间用0填充
+sdscatlen  连接传入的字符串，指定长度到尾部
+sdscat 链接传入的字符串
+sdscatsds 连接sds
+sdscpylen  复制字符串指定长度，从头开始复制，从头开始赋值
+sdscpy  同上，复制全部
+
