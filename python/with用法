@@ -1,0 +1,26 @@
+with  a  as b :
+   ...
+   
+   
+需要实现 __enter__  __exit__ 方法  执行完a，a的返回值执行enter方法返回值赋值给b  
+执行完内部语句，执行exit方法
+
+为了简化，实现enter exit 标准库提供 contextlib模块
+例一：使用生成器 
+from contextlib import contextmanager
+
+@contextmanager
+def managed_file(name):
+    try:
+        f = open(name, 'w')
+        yield f
+    finally:
+        f.close()
+
+>>> with managed_file('hello.txt') as f:
+...     f.write('hello, world!')
+...     f.write('bye now')
+
+先执行yield前半部分， 然后执行with内部部分，最后执行yield后半部分 yield返回值赋给as后面的值
+
+例二：
