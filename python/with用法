@@ -4,6 +4,8 @@ with  a  as b :
    
 需要实现 __enter__  __exit__ 方法  执行完a，a的返回值执行enter方法返回值赋值给b  
 执行完内部语句，执行exit方法
+exit 参数 exc_type exc_value trace_back
+异常类型， 异常对象， 调用栈信息
 
 为了简化，实现enter exit 标准库提供 contextlib模块
 例一：使用生成器 
